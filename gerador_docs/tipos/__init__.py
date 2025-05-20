@@ -14,7 +14,8 @@ class CPF:
         return self.numero
     
     def __repr__(self):
-        return f"<CPF({self.numero})>"
+        cpf = self.numero.replace('.', '').replace('-', '')
+        return f"<CPF(numero='{cpf}')>"
     
     def __eq__(self, other):
         if isinstance(other, CPF):
