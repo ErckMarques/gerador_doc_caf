@@ -2,9 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 from typing import List, Optional, Dict, Union
 
-from gerador_docs.errors import CPFInvalidError, CPFFormatError, CPFLengthError, RgFormatError
+from gerador_docs.errors import CPFInvalidError, CPFFormatError, CPFLengthError, RGFormatError
 
-Enderecos = List['Endereco'] | List[Dict[str, str]]
+Enderecos = Union[List['Endereco'], List[Dict[str, str]]]
 
 class RG:
     """
@@ -24,7 +24,7 @@ class RG:
     def _validar_digitos(self, rg: str):
         rg_limpo = rg.replace(".", "").replace("-", "")
         if not rg_limpo.isdigit():
-            raise RgFormatError(f"RG inválido: {rg}.")
+            raise RGFormatError(f"RG inválido: {rg}.")
         return rg_limpo
     
     def to_dict(self) -> Dict[str, str]:
@@ -42,7 +42,11 @@ class CPF:
     Representa um CPF (Cadastro de Pessoas Físicas) brasileiro.
     """
     def __init__(self, numero: str):
-        self.numero = self._validate(numero)
+        self._numero = self._validate(numero)
+
+    @property
+    def numero(self) -> str:
+        return self._numero
 
     def __str__(self):
         return self.numero
@@ -56,7 +60,7 @@ class CPF:
         Valida o CPF.
         :param numero: CPF a ser validado.
         :return: CPF validado.
-        :raises ValueError: Se o CPF for inválido.
+        :raises CPFInvalidError: Se o CPF for inválido.
         """
         try:
             self._verificar_repetidos(numero)
@@ -79,6 +83,7 @@ class CPF:
         """
         Valida o dígito verificador do CPF.
         :return: True se o dígito verificador for válido, False caso contrário.
+        :raises CPFInvalidError: Se o dígito verificador for inválido.
         """
         # Verifica o primeiro dígito verificador
         soma = sum(int(cpf[i]) * (10 - i) for i in range(9))
@@ -92,6 +97,7 @@ class CPF:
         """
         Valida o segundo dígito verificador do CPF.
         :return: True se o segundo dígito verificador for válido, False caso contrário.
+        :raises CPFInvalidError: Se o dígito verificador for inválido.
         """
         # Verifica o segundo dígito verificador
         soma = sum(int(cpf[i]) * (11 - i) for i in range(10))
@@ -105,6 +111,7 @@ class CPF:
         """
         Verifica o tamanho do CPF.
         :return: True se o tamanho do CPF for válido, False caso contrário.
+        :raises CPFLengthError: Se o tamanho do CPF for inválido.
         """
         if len(cpf) != 11:
             raise CPFLengthError(f"O CPF deve ter 11 dígitos.")
@@ -114,6 +121,7 @@ class CPF:
         """
         Verifica se o CPF contém apenas dígitos.
         :return: True se o CPF contiver apenas dígitos, False caso contrário.
+        :raises CPFFormatError: Se o CPF contiver caracteres não numéricos.
         """
         if not cpf.isdigit():
             raise CPFFormatError(f"O CPF deve conter apenas dígitos.")
@@ -123,6 +131,7 @@ class CPF:
         """
         Verifica se o CPF contém todos os dígitos iguais.
         :return: True se o CPF contiver todos os dígitos iguais, False caso contrário.
+        :raises CPFInvalidError: Se o CPF contiver todos os dígitos iguais.
         """
         if len(set(numero)) == 1:
             raise CPFInvalidError(f"CPF inválido: {numero}. O CPF não pode conter todos os dígitos iguais.")
@@ -152,6 +161,21 @@ class Endereco:
     def __str__(self) -> str:
         return f'{self.logradouro}, {self.numero}, {self.bairro}, {self.cidade}/{self.estado}, CEP: {self.cep}'
     
+    def __format__(self, format_spec: str) -> str:
+        """Formata o endereço de acordo com a especificação.
+        
+        format_spec pode ser:
+        - 'short': apenas logradouro, número e cidade (Rua Joaquim Correia, S/N, Feira Nova)
+        - 'default': formato completo
+        - 'oneline': tudo em uma linha sem quebras
+        """
+        if format_spec == 'short':
+            return f"{self.logradouro}, {self.numero}, {self.cidade}"
+        elif format_spec == 'oneline':
+            return str(self).replace('\n', ' ')
+        else:  # default
+            return str(self)
+    
     def to_dict(self):
         """Exporta o endereço como um dicionário.
         :return: Endereço em formato de dicionário.
@@ -161,10 +185,25 @@ class Endereco:
 @dataclass(repr=True, frozen=True)
 class DadosPessoais:
     nome_completo: str
-    cpf: CPF
-    rg: RG
+    cpf: CPF 
+    rg: RG 
     endereco: List[Endereco] = field(default_factory=list)
 
+    @property
+    def numero_cpf(self) -> str:
+        """Retorna o número do CPF."""
+        return self.cpf.numero
+    
+    @property
+    def numero_rg(self) -> str:
+        """Retorna o número do RG."""
+        return str(self.rg)
+
+    @property
+    def endereco_completo(self) -> List[str]:
+        """Retorna o(s) endereço(s) completo(s)."""
+        return [str(end) for end in self.endereco]
+    
     def to_dict(self) -> Dict[str, Union[str, Dict[str, str], Enderecos]]:
         """Exporta os dados pessoais como um dicionário.
         :return: Dados pessoais em formato de dicionário.
@@ -183,8 +222,9 @@ if __name__ == '__main__':
         cpf = CPF('12345678909') # CPF válido -> 123.456.789-09
         rg = RG('1047991', 'SSP', 'PE')
         endereco = Endereco(bairro='Centro', logradouro='Rua Joaquim Correia', complemento='Prédio Público') # Rua Joaquim Correia, S/N, Centro, Feira Nova/PE, CEP: 55715-000
-        dados_pessoais = DadosPessoais(nome_completo='João da Silva', cpf=cpf, rg=rg, endereco=[endereco])
-        print(dados_pessoais.to_dict())
+        endereco2 = Endereco(bairro='Zona Rural', logradouro='Sítio Cachoeira do Salobro')
+        dados_pessoais = DadosPessoais(nome_completo='João da Silva', cpf=cpf, rg=rg, endereco=[endereco, endereco2])
+        print(dados_pessoais.to_dict(), sort_dicts=False)
     except ValueError as e:
         print(e)
     except CPFInvalidError as e:

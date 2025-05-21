@@ -9,3 +9,7 @@ class CPFFormatError(Exception):
 class CPFLengthError(Exception):
     """Exception raised for invalid CPF length."""
     pass
+
+class RGFormatError(Exception):
+    """Exception raised for invalid RG format."""
+    pass
