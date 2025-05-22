@@ -13,3 +13,12 @@ class CPFLengthError(Exception):
 class RGFormatError(Exception):
     """Exception raised for invalid RG format."""
     pass
+
+class GenderError(Exception):
+    """Exception raised for invalid gender."""
+    pass
+
+class MaritalStatusError(Exception):
+    """Exception raised for invalid marital status."""
+    pass
+
