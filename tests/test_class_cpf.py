@@ -1,25 +1,39 @@
 import pytest
 
 from gerador_docs import CPF
+from gerador_docs.errors import CPFInvalidError
 
 @pytest.mark.parametrize(
-    "cpf_input, expected_output",
+    "cpf_input",
     [
-        ("12345678909", "123.456.789-09"),
-        ("11111111111", "111.111.111-11"),
-        ("22222222222", "222.222.222-22"),
-        ("33333333333", "333.333.333-33"),
-        ("44444444444", "444.444.444-44"),
-        ("55555555555", "555.555.555-55"),
-        ("66666666666", "666.666.666-66"),
-        ("77777777777", "777.777.777-77"),
-        ("88888888888", "888.888.888-88"),
-        ("99999999999", "999.999.999-99")
+        "11111111111",
+        "22222222222",
+        "33333333333",
     ]
 )
-def test_cpf(cpf_input, expected_output):
-    with pytest.raises(ValueError):
-        cpf = CPF(cpf_input)
-        assert cpf == expected_output, f"Expected {expected_output}, but got {str(cpf)}"
+@pytest.mark.parametrize(
+    "cpf_lengh_invalid",
+    [
+        "1254321",
+        "1234568791564765"
+    ]
+)
+@pytest.mark.parametrize(
+    "cpf_format_invalid",
+    [
+        "asdgfcvgbhn",
+        "1235as456sd",
+    ]
+)
+def test_cpf_invalid(cpf_input, cpf_lengh_invalid, cpf_format_invalid):
+    with pytest.raises(CPFInvalidError) as exc_info:
+        CPF(cpf_input)
+        assert str(exc_info.value) == f"CPF inválido: {cpf_input}. Erro O CPF não pode conter todos os dígitos iguais."
     
-    #rever como escrever este teste
+    with pytest.raises(CPFInvalidError) as exc_info:
+        CPF(cpf_lengh_invalid)
+        assert str(exc_info.value) == f"O CPF deve ter 11 dígitos."
+
+    with pytest.raises(CPFInvalidError) as exc_info:
+        CPF(cpf_format_invalid)
+        assert str(exc_info.value) == f"O CPF deve conter apenas dígitos."
