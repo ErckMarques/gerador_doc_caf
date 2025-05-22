@@ -1,5 +1,4 @@
 .venv/
-<<<<<<< HEAD
 .egg-info/
 __pycache__/
 *.pyc
@@ -9,7 +8,3 @@ __pycache__/
 *.sqlite3
 *.log
 *.egg
-=======
-*.egg-info/
-*/__pycache__
->>>>>>> f26de2d (.gitignore)
