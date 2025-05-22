@@ -12,7 +12,7 @@ setup(
         # "pandas>=1.0.0",
         # "openpyxl",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
