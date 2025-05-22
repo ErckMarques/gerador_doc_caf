@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 from typing import List, Optional, Dict, Union, Literal
 
-from gerador_docs.errors import CPFInvalidError, CPFFormatError, CPFLengthError, RGFormatError, 
+from gerador_docs.errors import CPFInvalidError, CPFFormatError, CPFLengthError, RGFormatError
 from gerador_docs.errors import GenderError, MaritalStatusError
 from gerador_docs.tipos._typing import DadosPessoaisDict
 
@@ -19,8 +19,8 @@ class RG:
         self._uf = uf
 
     def __str__(self) -> str:
-        return self._num_rg + '' + self._emissor.upper() + '/' + self._uf.upper()
-    
+        return self._num_rg + ' ' + self._emissor.upper() + ' / ' + self._uf.upper()
+
     def __repr__(self) -> str:
         return f'<RG(registro_geral={self._num_rg}, emissor={self._emissor}, uf={self._uf})>'
     
