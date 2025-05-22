@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: gerador_doc_caf
+Version: 0.1.0
+Summary: Programa auxiliar para gerar documentos para a emissão de CAF
+Author: Erik Marques
+Author-email: lucro.alternativo@outlook.com
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: requires-python
+Dynamic: summary
