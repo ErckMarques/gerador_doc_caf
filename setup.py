@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="gerador_doc_caf",
-    version="0.1.0",
-    description="Programa auxiliar para gerar documentos para a emissão de CAF",
+    name="gerador_docs",
+    version="0.1.6",
+    description="Programa auxiliar para gerar documentos para a emissão de CAF e Declarações de Agricultor",
     author="Erik Marques",
     author_email="lucro.alternativo@outlook.com",
     packages=find_packages(),
