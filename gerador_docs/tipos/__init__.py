@@ -1,10 +1,13 @@
 from __future__ import annotations
 from dataclasses import dataclass, field, asdict
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict, Union, Literal
 
-from gerador_docs.errors import CPFInvalidError, CPFFormatError, CPFLengthError, RGFormatError
+from gerador_docs.errors import CPFInvalidError, CPFFormatError, CPFLengthError, RGFormatError, 
+from gerador_docs.errors import GenderError, MaritalStatusError
+from gerador_docs.tipos._typing import DadosPessoaisDict
 
 Enderecos = Union[List['Endereco'], List[Dict[str, str]]]
+
 
 class RG:
     """
@@ -150,6 +153,7 @@ class Endereco:
     """
     Representa um endereço.
     """
+    tag: Literal['residencial', 'trabalho']
     bairro: str
     logradouro: str
     numero: str = 'S/N'
@@ -187,7 +191,21 @@ class DadosPessoais:
     nome_completo: str
     cpf: CPF 
     rg: RG 
-    endereco: List[Endereco] = field(default_factory=list)
+    genero: Literal['M', 'F', 'O']  # Masculino, Feminino ou Outro
+    estado_civil: Literal['solteiro', 'casado', 'divorciado', 'viuvo']
+    profissao: str
+    endereco: Dict[Literal['residencial', 'trabalho'], List[Endereco]] = field(default_factory=dict)
+    nacionalidade: str = field(init=False)
+
+    def __post_init__(self):
+        """Método chamado após a inicialização do dataclass.
+        Valida os dados pessoais e define a nacionalidade com base no gênero.
+        """
+        object.__setattr__(self, 'nacionalidade', 'brasileira' if self.genero == 'F' else 'brasileiro')
+        if len(self.genero) != 1:
+            raise GenderError(f"Valor inválido para gênero: {self.genero}. Deve ser 'M', 'F' ou 'O'.")
+        if self.estado_civil not in ('solteiro', 'casado', 'divorciado', 'viuvo'):
+            raise MaritalStatusError(f"Valor inválido para estado civil: {self.estado_civil}. Deve ser 'solteiro', 'casado', 'divorciado' ou 'viuvo'.")
 
     @property
     def numero_cpf(self) -> str:
@@ -196,23 +214,30 @@ class DadosPessoais:
     
     @property
     def numero_rg(self) -> str:
-        """Retorna o número do RG."""
+        """Retorna o número do RG + EMISSOR."""
         return str(self.rg)
 
     @property
     def endereco_completo(self) -> List[str]:
         """Retorna o(s) endereço(s) completo(s)."""
         return [str(end) for end in self.endereco]
-    
-    def to_dict(self) -> Dict[str, Union[str, Dict[str, str], Enderecos]]:
+
+    def to_dict(self) -> DadosPessoaisDict:
         """Exporta os dados pessoais como um dicionário.
         :return: Dados pessoais em formato de dicionário.
         """
         return {
             'nome_completo': self.nome_completo,
+            'genero': self.genero,
+            'estado_civil': self.estado_civil,
+            'profissao': self.profissao,
+            'nacionalidade': self.nacionalidade,
             'cpf': self.cpf.to_dict(),
             'rg': self.rg.to_dict(),
-            'endereco': [end.to_dict() for end in self.endereco]
+            'endereco': {
+                'residencial': [endereco.to_dict() for endereco in self.endereco.get('residencial', [])],
+                'trabalho': [endereco.to_dict() for endereco in self.endereco.get('trabalho', [])],
+            },
         }
 
 if __name__ == '__main__':
@@ -221,9 +246,21 @@ if __name__ == '__main__':
     try:
         cpf = CPF('12345678909') # CPF válido -> 123.456.789-09
         rg = RG('1047991', 'SSP', 'PE')
-        endereco = Endereco(bairro='Centro', logradouro='Rua Joaquim Correia', complemento='Prédio Público') # Rua Joaquim Correia, S/N, Centro, Feira Nova/PE, CEP: 55715-000
-        endereco2 = Endereco(bairro='Zona Rural', logradouro='Sítio Cachoeira do Salobro')
-        dados_pessoais = DadosPessoais(nome_completo='João da Silva', cpf=cpf, rg=rg, endereco=[endereco, endereco2])
+        endereco = Endereco(tag='trabalho', bairro='Centro', logradouro='Rua Joaquim Correia', complemento='Prédio Público') # Rua Joaquim Correia, S/N, Centro, Feira Nova/PE, CEP: 55715-000
+        endereco2 = Endereco(tag='residencial', bairro='Zona Rural', logradouro='Sítio Cachoeira do Salobro')
+        dados_pessoais = DadosPessoais(
+            nome_completo='João da Silva', 
+            genero='M', 
+            estado_civil='solteiro', 
+            profissao='agricultor', 
+            cpf=cpf, 
+            rg=rg, 
+            endereco={
+                'residencial': [endereco2],
+                'trabalho': [endereco]
+            }
+        )
+        # print(endereco.to_dict())
         print(dados_pessoais.to_dict(), sort_dicts=False)
     except ValueError as e:
         print(e)
