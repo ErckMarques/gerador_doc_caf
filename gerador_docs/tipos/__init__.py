@@ -4,8 +4,9 @@ from typing import List, Optional, Dict, Union, Literal
 
 from gerador_docs.tipos.documents  import CPF, RG
 
+from gerador_docs.errors import CPFInvalidError
 from gerador_docs.errors import GenderError, MaritalStatusError
-from gerador_docs.tipos._typing import DadosPessoaisDict
+from gerador_docs.tipos._typing import DadosPessoaisDict, EnderecoDict
 
 Enderecos = Union[List['Endereco'], Dict[Optional[Literal['residencial', 'trabalho']], List['Endereco']]]
 
@@ -24,7 +25,7 @@ class Endereco:
     cep: str = '55715-000'
 
     def __str__(self) -> str:
-        return f'{self.logradouro}, {self.numero}, {self.bairro}, {self.cidade}/{self.estado}, CEP: {self.cep}'
+        return f'{self.logradouro}, {self.numero}, {self.bairro}, {self.cidade}/{self.estado} CEP: {self.cep}'
     
     def __format__(self, format_spec: str) -> str:
         """Formata o endereço de acordo com a especificação.
@@ -41,11 +42,20 @@ class Endereco:
         else:  # default
             return str(self)
     
-    def to_dict(self):
+    def to_dict(self) -> EnderecoDict:
         """Exporta o endereço como um dicionário.
         :return: Endereço em formato de dicionário.
         """
-        return asdict(self)
+        return {
+            'tag': self.tag,
+            'bairro': self.bairro,
+            'logradouro': self.logradouro,
+            'numero': self.numero,
+            'complemento': self.complemento,
+            'cidade': self.cidade,
+            'estado': self.estado,
+            'cep': self.cep
+        }
 
 @dataclass(repr=True, frozen=True, init=False)
 class DadosPessoais:
@@ -70,13 +80,28 @@ class DadosPessoais:
         """
 
         # Processamento do endereco
-        enderecos_processados = {'residencial': List[Endereco], 'trabalho': List[Endereco]}
-        for item in endereco:
-            if isinstance(item, dict):
-                end = Endereco(**item)
-            else:
-                end = item
-            enderecos_processados[end.tag].append(end)
+        enderecos_processados = {'residencial': [], 'trabalho': []}
+        # Suporta tanto lista quanto dict para o argumento endereco
+        if isinstance(endereco, dict):
+            for tag, lista in endereco.items():
+                if tag not in enderecos_processados:
+                    continue
+                for item in lista:
+                    if isinstance(item, dict):
+                        end = Endereco(**item)
+                    else:
+                        end = item
+                    enderecos_processados[tag].append(end)
+        elif isinstance(endereco, list):
+            for item in endereco:
+                if isinstance(item, dict):
+                    end = Endereco(**item)
+                else:
+                    end = item
+                if hasattr(end, 'tag') and end.tag in enderecos_processados:
+                    enderecos_processados[end.tag].append(end)
+        else:
+            raise ValueError("O argumento 'endereco' deve ser uma lista ou um dicionário.")
 
         object.__setattr__(self, 'nome_completo', nome_completo)
         object.__setattr__(self, 'cpf', cpf)

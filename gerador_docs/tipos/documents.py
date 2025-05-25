@@ -13,8 +13,12 @@ class RG:
         self._emissor = emissor
         self._uf = uf
 
+    @property
+    def num_rg(self) -> str:
+        return self.__str__()
+
     def __str__(self) -> str:
-        return self._num_rg + ' ' + self._emissor.upper() + ' / ' + self._uf.upper()
+        return self._num_rg + ' ' + self._emissor.upper() + '/' + self._uf.upper()
 
     def __repr__(self) -> str:
         return f'<RG(registro_geral={self._num_rg}, emissor={self._emissor}, uf={self._uf})>'
@@ -30,9 +34,7 @@ class RG:
         :return: RG em formato de dicionário.
         """
         return {
-            'numero': self._num_rg,
-            'emissor': self._emissor,
-            'uf': self._uf
+            'numero': self.__str__(),
         }
 
 class CPF:
@@ -47,7 +49,7 @@ class CPF:
         return self._numero
 
     def __str__(self):
-        return self.numero
+        return self._numero
     
     def __repr__(self):
         cpf = self.numero.replace('.', '').replace('-', '')
