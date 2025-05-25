@@ -23,7 +23,7 @@ def test_cpf_repetd_numbers(cpf_repeted_numbers):
         "1234568791564765"
     ]
 )
-def test_cpf_invalid(cpf_lengh_invalid):
+def test_cpf_invalid_length(cpf_lengh_invalid):
     '''Testa se o cpf tem 11 dígitos.'''
     with pytest.raises(CPFInvalidError) as exc_info:
         CPF(cpf_lengh_invalid)
@@ -36,8 +36,21 @@ def test_cpf_invalid(cpf_lengh_invalid):
         "1235as456sd",
     ]
 )
-def test_cpf_invalid(cpf_format_invalid):
+def test_cpf_invalid_format(cpf_format_invalid):
     '''Testa se o cpf contem apenas números.'''
     with pytest.raises(CPFInvalidError) as exc_info:
         CPF(cpf_format_invalid)
         assert str(exc_info.value) == f"O CPF deve conter apenas dígitos."
+
+@pytest.mark.parametrize(
+    "cpf_valid",
+    [
+        "12345678909",
+        "52998224725"
+
+    ]
+)
+def test_cpf_valid(cpf_valid):
+    '''Testa se o cpf é valido.'''
+    cpf = CPF(cpf_valid)
+    assert cpf.numero == f"{cpf_valid[:3]}.{cpf_valid[3:6]}.{cpf_valid[6:9]}-{cpf_valid[9:]}"
