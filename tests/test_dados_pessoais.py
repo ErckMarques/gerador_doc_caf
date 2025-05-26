@@ -1,5 +1,11 @@
+import pytest
 
-def test_dados_pessoais(dados_pessoais):
+from dataclasses import replace
+
+from gerador_docs import DadosPessoais
+from gerador_docs.errors import MaritalStatusError, GenderError
+
+def test_dados_pessoais(dados_pessoais: DadosPessoais):
     """Testa a criação e representação dos dados pessoais."""
     
     assert dados_pessoais.nome_completo == 'João da Silva'
@@ -30,3 +36,16 @@ def test_dados_pessoais(dados_pessoais):
     }
     
     assert dados_pessoais.to_dict() == expected_dict
+
+@pytest.mark.parametrize("marital_status_alt", ["amigado", "mora junto"])
+def test_exception_MaritalStatusError(dados_pessoais: DadosPessoais, marital_status_alt):
+    """Testa a exceção de estado civil inválido."""
+    
+    with pytest.raises(MaritalStatusError, match="Valor inválido para estado civil"):
+        replace(dados_pessoais, estado_civil=marital_status_alt)
+
+def test_exception_GenderError(dados_pessoais: DadosPessoais):
+    """Testa a exceção de gênero inválido."""
+
+    with pytest.raises(GenderError, match="Valor inválido para gênero"):
+        replace(dados_pessoais, genero='X')
