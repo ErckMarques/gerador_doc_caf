@@ -1,7 +1,8 @@
 
 from typing import Dict
 from gerador_docs.errors import CPFInvalidError, CPFFormatError, CPFLengthError, RGFormatError
-
+from gerador_docs.errors import CARNumberFormatError, CARNumberLengthError, CARNumberInvalidError
+from gerador_docs.errors import CAFNumberFormatError, CAFNumberLengthError, CAFNumberInvalidError
 
 
 class RG:
@@ -145,6 +146,40 @@ class CPF:
             'numero': self.numero
         }
     
-class CAR: pass
+class CAR:
+
+    def __init__(self, numero: str) -> None:
+        self._numero = self._validar(numero)
+
+    @property
+    def numero(self) -> str:
+        return self._numero
+    
+    def __str__(self) -> str:
+        return f'CAF Nº: {self._numero}'
+    
+    def __repr__(self) -> str:
+        return f'<CAR(numero={self._numero})>'
+    
+    def _validar(self, numero: str) -> str:
+        """
+        Valida o número do CAR.
+        :param numero: Número do CAR a ser validado.
+        :return: Número do CAR validado.
+        :raises CARNumberFormatError: Se o formato do número do CAR for inválido.
+        :raises CARNumberLengthError: Se o comprimento do número do CAR for inválido.
+        :raises CARNumberInvalidError: Se o número do CAR for inválido.
+        """
+        tam_numero = len(numero)
+        if len(numero.split('.')) != 7:
+            raise CARNumberFormatError(f"Deve conter 7 partes.")
+        if numero.isdigit() is not False:
+            raise CARNumberFormatError(f"Númeoro do CAR contém apenas digitos.")
+        if tam_numero != 50:
+            raise CARNumberLengthError(f"Deve ter 50 dígitos.")
+        if tam_numero in (13, 50):
+            raise CARNumberInvalidError(f"Número do CAR contém muitos digitos repetidos.")
+        
+        return numero
 
 class CAF: pass
