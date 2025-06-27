@@ -1,6 +1,17 @@
+# ambientes virtuais
 .venv/
-.egg-info/
+.env/
+env/
+venv/
+
+# arquivos de instalação
+*.egg-info/
+dist/
+build/
+# arquivos de cache
 __pycache__/
+
+:arquivos de dados
 *.pyc
 *.pyo
 *.pyd
@@ -8,4 +19,6 @@ __pycache__/
 *.sqlite3
 *.log
 *.egg
+
+# arquivos de saída
 output/
