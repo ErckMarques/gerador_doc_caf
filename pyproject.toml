@@ -9,7 +9,7 @@ description = "Programa auxiliar para gerar documentos para a emissão de CAF"
 authors = [
     { name = "Erik Marques", email = "lucro.alternativo@outlook.com" }
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
     "rich==14.0.0",
     "rich-argparse==1.7.1",
