@@ -1,5 +1,8 @@
+from argparse import ArgumentParser
+
 import pytest
 
+from gerador_docs.cli import _create_parser
 from gerador_docs import CPF, DadosPessoais, Endereco, RG
 
 @pytest.fixture(scope='module')
@@ -28,3 +31,8 @@ def dados_pessoais(endereco):
         profissao='Engenheiro',
         endereco=[endereco]
     )
+
+@pytest.fixture(scope='module')
+def parser() -> ArgumentParser:
+    """Fixture para criar o parser de argumentos."""
+    return _create_parser()
