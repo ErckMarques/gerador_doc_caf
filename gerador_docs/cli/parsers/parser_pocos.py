@@ -8,17 +8,11 @@ def poco_subparser(subparser: _SubParsersAction) -> ArgumentParser:
     poco_subparser: ArgumentParser = subparser.add_parser(
         "poco",
         formatter_class=RawDescriptionRichHelpFormatter,
-        help="Comandos relacionados à emissão dos documentos e dados dos responsáveis pelos poços."
+        help="Comandos relacionados à emissão das solicitações de pagamento dos poços."
     )
 
     poco_subparser.set_defaults(
         command="poco",
-    )
-
-    poco_subparser.add_argument(
-        "pag",
-        help="gera a solicitação de pagamento para um ou mais poços".capitalize(),
-        nargs=ONE_OR_MORE,
     )
 
     return poco_subparser
