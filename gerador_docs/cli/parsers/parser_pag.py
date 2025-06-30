@@ -1,7 +1,7 @@
 from argparse import ArgumentParser, _SubParsersAction
 from rich_argparse import RawDescriptionRichHelpFormatter
 
-def declaracao_subparser(subparser: _SubParsersAction) -> ArgumentParser:
+def pagamento_subparser(subparser: _SubParsersAction) -> ArgumentParser:
     declaracao_subparser: ArgumentParser = subparser.add_parser(
         "pagamento",
         formatter_class=RawDescriptionRichHelpFormatter,
