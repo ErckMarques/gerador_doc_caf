@@ -30,8 +30,19 @@ def main() -> None:
     Main function to execute the command line interface.
     """
     try:
+        from gerador_docs.cli.shell import clear
+
+        clear()  # Clear the console before displaying the help message
         parser = _create_parser()
         args = parser.parse_args()
+
+        print(
+            dedent(f"""
+            Comando: {args.command}
+            Argumentos: {args}
+            """
+            )
+        )
         
         # Here you would handle the parsed arguments and execute the corresponding actions
         # For now, we just print the parsed arguments
