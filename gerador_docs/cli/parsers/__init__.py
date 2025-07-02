@@ -9,7 +9,7 @@ from .parser_pag import pagamento_subparser
 def config_subparsers(parser: ArgumentParser) -> None: 
     subparser = parser.add_subparsers(dest="command", required=True,)
 
-    db_subparser(subparser)
+    db_subparser(subparser, parser.formatter_class)
     poco_subparser(subparser)
     caf_subparser(subparser)
     declaracao_subparser(subparser)
