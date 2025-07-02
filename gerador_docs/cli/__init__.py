@@ -3,7 +3,8 @@ from textwrap import dedent
 
 from rich_argparse import RawDescriptionRichHelpFormatter
 
-from .parsers import config_subparsers as config_parser
+from gerador_docs.cli.parsers import config_subparsers as config_parser
+from gerador_docs.cli._types import NamespaceMapper
 
 def _create_parser() -> ArgumentParser:
     """
@@ -16,7 +17,7 @@ def _create_parser() -> ArgumentParser:
             e outros tipos de documentos comuns da Secretaria de Agricultura de Feira Nova-PE.
         """
         ),
-        epilog='Use "docgen <comando> --help" para mais informações sobre cada comando.',
+        epilog='Use "docgen <comando> -h/--help" para mais informações sobre cada comando.',
         formatter_class=RawDescriptionRichHelpFormatter,
     )
     
@@ -29,17 +30,19 @@ def main() -> None:
     """
     Main function to execute the command line interface.
     """
+    
+    parser = _create_parser()
+    
     try:
         from gerador_docs.cli.shell import clear
 
         clear()  # Clear the console before displaying the help message
-        parser = _create_parser()
-        args = parser.parse_args()
+        args = parser.parse_args(namespace=NamespaceMapper())
 
         print(
             dedent(f"""
             Comando: {args.command}
-            Argumentos: {args}
+            Argumentos: {args.to_dict()}
             """
             )
         )
@@ -55,4 +58,4 @@ def main() -> None:
         from gerador_docs.cli.runners import DefaultRunner
 
         default_runner = DefaultRunner()
-        getattr(default_runner, args.command)(args)
+        getattr(default_runner, args.command)(vars(args))
